@@ -136,13 +136,13 @@ For each file, check:
 
 **文件命名**
 ```
-review-<branch>-<short-sha>-YYYYMMDDTHHMMSS.md
+review-YYYYMMDDTHHMMSS-<branch>-<short-sha>.md
 ```
+- `YYYYMMDDTHHMMSS`: ISO8601 时间戳
 - `<branch>`: 分支名（斜杠替换为下划线），例如 `feature_x`、`bugfix_auth`
 - `<short-sha>`: 提交 hash 前 7 位，例如 `1a2b3c4`
-- `YYYYMMDDTHHMMSS`: ISO8601 时间戳
 
-示例：`review-feature_x-1a2b3c4-20260317T143200.md`
+示例：`review-20260317T143200-feature_x-1a2b3c4.md`
 
 **文件编码与格式**
 - UTF-8 编码
@@ -195,11 +195,13 @@ tags: ["performance", "security", "architecture"]
 4. **重要问题（Major Issues / Blocking）** — 🔴 标记，包含：
    - 问题标题
    - 影响范围与复现步骤
+   - 文件定位：[文件路径](相对链接) 用于 vscode 快速跳转
    - 代码定位：[文件路径](相对链接) @ commit hash
    - 建议修复方案
    ```
    ## 🔴 [blocking] 路由缓存竞态
    
+   **文件**：[src/router.ts](src/router.ts)
    **位置**：[src/router.ts](src/router.ts#L120-L150) @ 1a2b3c4
    
    **问题**：高并发下可能导致重复注册路由，引发路由冲突。
@@ -217,6 +219,7 @@ tags: ["performance", "security", "architecture"]
    ```
    ## 🟡 [important] 缺少单元测试
    
+   **文件**：[src/middleware.ts](src/middleware.ts)
    **位置**：[src/middleware.ts](src/middleware.ts#L45-L60) @ 1a2b3c4
    
    **问题**：新增中间件没有对应的单元测试。
@@ -228,7 +231,8 @@ tags: ["performance", "security", "architecture"]
    ```
    ## 🟢 [nit] 变量命名建议
    
-   - [src/utils.ts#L10](src/utils.ts#L10) @ 1a2b3c4：`uc` → `userCount` 提高可读性
+   **文件**：[src/utils.ts](src/utils.ts)
+   **位置**：[src/utils.ts#L10](src/utils.ts#L10) @ 1a2b3c4：`uc` → `userCount` 提高可读性
    ```
 
 7. **测试与验证（Tests & How to Verify）**
