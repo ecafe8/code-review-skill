@@ -11,6 +11,7 @@ React 审查重点：Hooks 规则、性能优化的适度性、组件设计、�
 - [Error Boundaries & Suspense](#error-boundaries--suspense)
 - [Server Components (RSC)](#server-components-rsc)
 - [React 19 Actions & Forms](#react-19-actions--forms)
+- [Next.js 16 新规则](#nextjs-16-新规则)
 - [Suspense & Streaming SSR](#suspense--streaming-ssr)
 - [TanStack Query v5](#tanstack-query-v5)
 - [Review Checklists](#review-checklists)
@@ -381,7 +382,7 @@ function FastLike({ postId, likes }) {
 }
 ```
 
-### Server Actions (Next.js 15+)
+### Server Actions (Next.js 16+)
 
 ```tsx
 // ❌ 客户端调用 API
@@ -423,9 +424,88 @@ function PostForm() {
 
 ---
 
+## Next.js 16 新规则
+
+Next.js 16 相比 15 的审查重点，集中在请求 API 全异步化、缓存语义升级、以及 middleware 到 proxy 的约定迁移。
+
+### Async Request APIs（同步访问已移除）
+
+```tsx
+// ❌ 旧写法：同步读取 params/searchParams
+export default function Page({ params, searchParams }) {
+  const slug = params.slug;
+  const q = searchParams.q;
+  return <div>{slug} - {q}</div>;
+}
+
+// ✅ Next.js 16：必须异步读取
+export default async function Page(props: {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ q?: string }>;
+}) {
+  const params = await props.params;
+  const searchParams = await props.searchParams;
+  return <div>{params.slug} - {searchParams.q}</div>;
+}
+
+// ✅ cookies/headers 也必须 await
+import { cookies, headers } from 'next/headers';
+
+export async function RuntimeInfo() {
+  const cookieStore = await cookies();
+  const headerStore = await headers();
+  return <div>{cookieStore.get('theme')?.value} / {headerStore.get('user-agent')}</div>;
+}
+```
+
+### Caching（Cache Components + 新的 revalidateTag 签名）
+
+```tsx
+// ✅ 用 'use cache' + cacheTag 标记可缓存计算
+import { cacheTag, revalidateTag, updateTag } from 'next/cache';
+
+export async function getProducts() {
+  'use cache';
+  cacheTag('products');
+  return db.query('SELECT * FROM products');
+}
+
+// ✅ Next.js 16 推荐：revalidateTag(tag, 'max')
+export async function refreshProducts() {
+  'use server';
+  revalidateTag('products', 'max');
+}
+
+// ✅ 需要立即读到最新数据时，使用 updateTag
+export async function mutateProducts() {
+  'use server';
+  await db.products.update(...);
+  updateTag('products');
+}
+```
+
+### Proxy 约定（替代 middleware）
+
+```ts
+// ❌ Next.js 16 前的约定（已迁移）
+// middleware.ts
+// export function middleware(request: NextRequest) {}
+
+// ✅ Next.js 16：使用 proxy.ts + proxy 函数
+// proxy.ts
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+
+export function proxy(request: NextRequest) {
+  return NextResponse.next();
+}
+```
+
+---
+
 ## Suspense & Streaming SSR
 
-Suspense 和 Streaming 是 React 18+ 的核心特性，在 2025 年的 Next.js 15 等框架中广泛使用。
+Suspense 和 Streaming 是 React 18+ 的核心特性，在 Next.js 16 等框架中广泛使用。
 
 ### 基础 Suspense
 
@@ -485,7 +565,7 @@ function GoodLayout() {
 }
 ```
 
-### Next.js 15 Streaming
+### Next.js 16 Streaming
 
 ```tsx
 // app/page.tsx - 自动 Streaming
@@ -846,6 +926,15 @@ if (isLoading) return <Spinner />;  // 首次加载中
 - [ ] useFormStatus 在 form 子组件中调用
 - [ ] useOptimistic 不用于关键业务（支付等）
 - [ ] Server Action 正确标记 'use server'
+
+### Next.js 16 迁移审查
+
+- [ ] 不再同步读取 cookies/headers/draftMode/params/searchParams
+- [ ] 页面与 metadata 相关函数已适配 async params/searchParams
+- [ ] 动态请求 API 的使用是有意为之（接受路由动态渲染与缓存影响）
+- [ ] 缓存策略优先使用 'use cache' + cacheTag/cacheLife
+- [ ] revalidateTag 使用双参数签名（如 revalidateTag('tag', 'max')）
+- [ ] 需要“写后立即可见”语义时使用 updateTag
 
 ### Suspense & Streaming
 
