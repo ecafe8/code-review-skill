@@ -171,21 +171,22 @@ Use labels to indicate priority:
 
 ## Language-Specific Guides
 
-根据审查的代码语言，查阅对应的详细指南：
+根据审查的代码语言、框架，查阅对应的详细指南：
 
 | Language/Framework | Reference File | Key Topics |
 |-------------------|----------------|------------|
 | **React** | [React Guide](reference/react.md) | Hooks, useEffect, React 19 Actions, RSC, Suspense, TanStack Query v5 |
-| **Vue 3** | [Vue Guide](reference/vue.md) | Composition API, 响应性系统, Props/Emits, Watchers, Composables |
-| **Rust** | [Rust Guide](reference/rust.md) | 所有权/借用, Unsafe 审查, 异步代码, 错误处理 |
 | **TypeScript** | [TypeScript Guide](reference/typescript.md) | 类型安全, async/await, 不可变性 |
 | **Hono** | [Hono Guide](reference/hono.md) | 中间件设计, 路由优化, 性能审查, 类型安全 RPC, 认证与安全, 应用结构 |
+| **Drizzle ORM** | [Drizzle Guide](reference/drizzle.md) | Schema 定义, 查询构造器, 关系查询, Mutations 安全性, 事务完整性, drizzle-kit 迁移管理 |
+| **CSS/Less/Sass** | [CSS Guide](reference/css-less-sass.md) | 变量规范, !important, 性能优化, 响应式, 兼容性 |
 | **Python** | [Python Guide](reference/python.md) | 可变默认参数, 异常处理, 类属性 |
 | **Java** | [Java Guide](reference/java.md) | Java 17/21 新特性, Spring Boot 3, 虚拟线程, Stream/Optional |
 | **Go** | [Go Guide](reference/go.md) | 错误处理, goroutine/channel, context, 接口设计 |
 | **C** | [C Guide](reference/c.md) | 指针/缓冲区, 内存安全, UB, 错误处理 |
 | **C++** | [C++ Guide](reference/cpp.md) | RAII, 生命周期, Rule of 0/3/5, 异常安全 |
-| **CSS/Less/Sass** | [CSS Guide](reference/css-less-sass.md) | 变量规范, !important, 性能优化, 响应式, 兼容性 |
+| **Vue 3** | [Vue Guide](reference/vue.md) | Composition API, 响应性系统, Props/Emits, Watchers, Composables |
+| **Rust** | [Rust Guide](reference/rust.md) | 所有权/借用, Unsafe 审查, 异步代码, 错误处理 |
 | **Qt** | [Qt Guide](reference/qt.md) | 对象模型, 信号/槽, 内存管理, 线程安全, 性能 |
 
 ## Additional Resources
