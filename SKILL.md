@@ -128,6 +128,131 @@ For each file, check:
    - 🔄 Request Changes (must address)
 4. Offer to pair if complex
 
+### Phase 5: Generate Review Report (2-3 minutes)
+
+导出本次 review 结果为结构化 Markdown 文件，便于归档、搜索与后续跟进。
+
+#### 输出文件规范
+
+**文件命名**
+```
+review-<branch>-<short-sha>-YYYYMMDDTHHMMSS.md
+```
+- `<branch>`: 分支名（斜杠替换为下划线），例如 `feature_x`、`bugfix_auth`
+- `<short-sha>`: 提交 hash 前 7 位，例如 `1a2b3c4`
+- `YYYYMMDDTHHMMSS`: ISO8601 时间戳
+
+示例：`review-feature_x-1a2b3c4-20260317T143200.md`
+
+**文件编码与格式**
+- UTF-8 编码
+- CommonMark 格式
+- 代码片段使用三重反引号并标注语言
+
+**YAML Frontmatter（必须）**
+
+```yaml
+---
+title: "简短标题描述本次审查"
+repo: "仓库名"
+branch: "feature/x/new-router"
+commit: "1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s0t"
+commit_short: "1a2b3c4"
+author: "提交者 username"
+reviewers: ["reviewer1", "reviewer2"]
+date: "2026-03-17T14:32:00Z"
+decision: "Request Changes"
+ci_status: "pass"
+severity_summary:
+  blocking: 1
+  important: 2
+  nit: 3
+tags: ["performance", "security", "architecture"]
+---
+```
+
+**文档主体结构（固定顺序）**
+
+1. **TL;DR** — 一句结论
+   ```
+   [决策符号] [主要问题] 【分支】 [提交HASH]
+   示例：🔴 [blocking] 路由缓存竞态 【feature_x】 1a2b3c4
+   ```
+
+2. **概要（Summary）** — 变更目的与范围（1-3 段）
+   ```
+   - 涵盖的文件数、行数
+   - 主要的功能变更或修复
+   - 相关的业务需求或技术债务
+   ```
+
+3. **优点（What I liked）** — 列点，使用 🎉 标记
+   ```
+   - 🎉 设计简洁，易于测试
+   - 🎉 充分的错误处理
+   ```
+
+4. **重要问题（Major Issues / Blocking）** — 🔴 标记，包含：
+   - 问题标题
+   - 影响范围与复现步骤
+   - 代码定位：[文件路径](相对链接) @ commit hash
+   - 建议修复方案
+   ```
+   ## 🔴 [blocking] 路由缓存竞态
+   
+   **位置**：[src/router.ts](src/router.ts#L120-L150) @ 1a2b3c4
+   
+   **问题**：高并发下可能导致重复注册路由，引发路由冲突。
+   
+   **复现**：
+   - 运行 `scripts/load-test.sh`
+   - 观察日志中的 duplicate route 警告
+   
+   **建议修复**：
+   - 使用 ReadWrite 锁保护缓存更新
+   - 或改为原子操作（CAS）+重试机制
+   ```
+
+5. **次要问题（Important / Non-blocking）** — 🟡 标记
+   ```
+   ## 🟡 [important] 缺少单元测试
+   
+   **位置**：[src/middleware.ts](src/middleware.ts#L45-L60) @ 1a2b3c4
+   
+   **问题**：新增中间件没有对应的单元测试。
+   
+   **建议**：补充边界情况测试，至少覆盖：timeout、error response、header validation。
+   ```
+
+6. **小建议（Nit / Style）** — 🟢 标记
+   ```
+   ## 🟢 [nit] 变量命名建议
+   
+   - [src/utils.ts#L10](src/utils.ts#L10) @ 1a2b3c4：`uc` → `userCount` 提高可读性
+   ```
+
+7. **测试与验证（Tests & How to Verify）**
+   ```
+   ## 测试状态
+   
+   - ✅ 单元测试：通过 (45 cases)
+   - ✅ 集成测试：通过
+   - ❌ E2E 测试：1 个失败（超时）
+   
+   ## 本地验证步骤
+   
+   \`\`\`bash
+   git checkout -b review/feature_x 1a2b3c4
+   bun install
+   bun run test
+   bun run test:e2e
+   \`\`\`
+   ```
+
+#### 存放位置与权限
+
+- **位置**：存放到 `review-archive/` 子目录，避免污染主分支代码
+
 ## Review Techniques
 
 ### Technique 1: The Checklist Method
